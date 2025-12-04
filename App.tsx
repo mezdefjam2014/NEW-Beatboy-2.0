@@ -6,7 +6,7 @@ import {
   HelpCircle, Keyboard, Settings2, Sparkles, Type, Aperture, Palette, Video as VideoIcon,
   Move, Eye, EyeOff, MousePointer2, RefreshCw, Maximize2, Minimize2, Grid, Magnet, Briefcase,
   Calculator, FileText, Clock, ListChecks, DollarSign, Calendar, Hash, Radio, Mic, Music2, PenTool, Speaker, Copy,
-  ScrollText, Receipt, Menu, Youtube, FileSignature, Lock, Key, ShieldCheck, Laptop, Info
+  ScrollText, Receipt, Menu, Youtube, FileSignature, Lock, Key, ShieldCheck, Laptop, Info, Power
 } from 'lucide-react';
 import Knob from './components/Knob';
 import Waveform from './components/Waveform';
@@ -222,7 +222,7 @@ const ActivationModal: React.FC<ActivationProps> = ({ onSuccess, initialError })
 };
 
 // --- BPM Tapper Component ---
-const BPMButton = () => {
+const BPMButton = React.memo(() => {
     const [taps, setTaps] = useState<number[]>([]);
     const [bpm, setBpm] = useState(0);
     const [isTapped, setIsTapped] = useState(false);
@@ -261,10 +261,10 @@ const BPMButton = () => {
             </div>
         </div>
     );
-};
+});
 
-// --- Business Tool Components ---
-const ContractTool = () => {
+// --- Business Tool Components (Memoized for Performance) ---
+const ContractTool = React.memo(() => {
     const [data, setData] = useState({ 
         producer: 'Beatboy', artist: '', title: '', price: '29.99', date: new Date().toISOString().split('T')[0],
         rights: 'Non-Exclusive' 
@@ -331,9 +331,9 @@ const ContractTool = () => {
             <button onClick={handleGenerate} className="mt-auto w-full bg-[var(--accent)] hover:opacity-90 text-white py-3 rounded-lg font-bold text-xs flex items-center justify-center gap-2"><FileSignature size={14}/> GENERATE PDF AGREEMENT</button>
         </div>
     );
-};
+});
 
-const InvoiceTool = () => {
+const InvoiceTool = React.memo(() => {
     const [data, setData] = useState({ 
         from: 'Beatboy Productions', to: '', invNum: `INV-${Math.floor(Math.random()*10000)}`, 
         date: new Date().toISOString().split('T')[0],
@@ -397,9 +397,9 @@ const InvoiceTool = () => {
              <button onClick={handleGenerate} className="mt-auto w-full bg-zinc-100 hover:bg-white text-black py-3 rounded-lg font-bold text-xs flex items-center justify-center gap-2"><ScrollText size={14}/> CREATE INVOICE PDF</button>
         </div>
     );
-};
+});
 
-const PriceMenuTool = () => {
+const PriceMenuTool = React.memo(() => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [prices, setPrices] = useState({ mp3: '29.99', wav: '49.99', stems: '99.99', unlim: '199.99' });
     const [footerText, setFooterText] = useState('BUY 2 GET 1 FREE');
@@ -579,9 +579,9 @@ const PriceMenuTool = () => {
              <button onClick={downloadMenu} className="w-full bg-[var(--accent)] hover:opacity-90 text-white py-3 rounded-lg font-bold text-xs flex items-center justify-center gap-2 shrink-0"><ImageIcon size={14}/> DOWNLOAD MENU IMAGE</button>
         </div>
     );
-};
+});
 
-const SplitSheetTool = () => {
+const SplitSheetTool = React.memo(() => {
     const [collaborators, setCollaborators] = useState([{role: 'Producer', percent: 50}, {role: 'Artist', percent: 50}]);
     
     const updatePercent = (idx: number, val: number) => {
@@ -626,9 +626,9 @@ const SplitSheetTool = () => {
              <button onClick={handleDownloadSplits} className="w-full py-3 bg-zinc-100 hover:bg-white text-black rounded-lg text-xs font-bold flex items-center justify-center gap-2"><Download size={14}/> DOWNLOAD CSV</button>
         </div>
     );
-};
+});
 
-const ReceiptTool = () => {
+const ReceiptTool = React.memo(() => {
     const [data, setData] = useState({ 
         id: `TX-${Math.floor(Math.random()*100000)}`, item: 'Untagged WAV Lease', price: '49.99', date: new Date().toISOString().split('T')[0] 
     });
@@ -668,16 +668,20 @@ const ReceiptTool = () => {
             <button onClick={handleGenerate} className="mt-auto w-full bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-lg font-bold text-xs flex items-center justify-center gap-2"><Receipt size={14}/> GENERATE RECEIPT PDF</button>
         </div>
     );
-};
+});
 
-const HashtagTool = () => {
+const HashtagTool = React.memo(() => {
     const [genre, setGenre] = useState('Trap');
     const [mood, setMood] = useState('Dark');
+    const [keywords, setKeywords] = useState('');
     const [result, setResult] = useState({ title: '', tags: '' });
 
     const generate = () => {
-        const title = `FREE ${mood} ${genre} Type Beat - "VISION" | Hard ${genre} Instrumental 2024`;
-        const tags = `#${genre.toLowerCase()}typebeat #${mood.toLowerCase()}beat #freebeat #instrumental #${genre.toLowerCase()} #producer #newbeat`;
+        const extra = keywords ? ` ${keywords}` : '';
+        const contextTags = keywords ? keywords.split(' ').filter(k => k.length > 2).map(k => `#${k.replace(/[^a-zA-Z0-9]/g, '')}`).join(' ') : '';
+        
+        const title = `FREE ${mood} ${genre} Type Beat${extra} - "VISION" | Hard ${genre} Instrumental 2024`;
+        const tags = `#${genre.toLowerCase()}typebeat #${mood.toLowerCase()}beat ${contextTags} #freebeat #instrumental #${genre.toLowerCase()} #producer #newbeat`;
         setResult({ title, tags });
     };
 
@@ -691,6 +695,17 @@ const HashtagTool = () => {
                 </div>
                 <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">MOOD/VIBE</label><input value={mood} onChange={e => setMood(e.target.value)} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
             </div>
+            
+            <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500">CONTEXT / KEYWORDS (OPTIONAL)</label>
+                <textarea 
+                    value={keywords} 
+                    onChange={e => setKeywords(e.target.value)} 
+                    className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white h-16 resize-none focus:outline-none focus:border-[var(--accent)]"
+                    placeholder="e.g. fast paced, dark piano, hard 808s, for Drake"
+                />
+            </div>
+
             <button onClick={generate} className="w-full bg-[var(--accent)] hover:opacity-90 text-white py-2 rounded font-bold text-xs">GENERATE SEO</button>
             
             <div className="flex-1 bg-black rounded border border-zinc-800 p-3 space-y-4">
@@ -711,9 +726,9 @@ const HashtagTool = () => {
             </div>
         </div>
     );
-};
+});
 
-const DescriptionTool = () => {
+const DescriptionTool = React.memo(() => {
     const [data, setData] = useState({ link: 'beatstars.com/beat', bpm: '140', key: 'C Minor', website: 'www.beatboy.com', email: 'contact@beatboy.com' });
     const [output, setOutput] = useState('');
 
@@ -752,9 +767,9 @@ Twitter: @beatboy
              <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-zinc-800 hover:bg-zinc-700 py-2 rounded text-xs font-bold">COPY TO CLIPBOARD</button>
         </div>
     );
-};
+});
 
-const NotesApp = () => {
+const NotesApp = React.memo(() => {
     const [notes, setNotes] = useState("");
     
     useEffect(() => {
@@ -777,9 +792,9 @@ const NotesApp = () => {
             ></textarea>
         </div>
     );
-};
+});
 
-const LicenseTool = () => {
+const LicenseTool = React.memo(() => {
     const serial = localStorage.getItem('beatboy_serial') || 'UNKNOWN';
     const deviceId = localStorage.getItem('beatboy_device_id') || 'UNKNOWN';
     const date = localStorage.getItem('beatboy_activation_date') || 'Unknown';
@@ -818,7 +833,7 @@ const LicenseTool = () => {
             </div>
         </div>
     );
-};
+});
 
 // Define Tool Meta outside App to prevent re-creation
 const TOOLS_META = [
@@ -2391,11 +2406,21 @@ Contact support@beatboy.com
 
                {/* Content Area */}
                <div className="flex-1 p-8 bg-gradient-to-br from-[#121214] to-black flex flex-col min-w-0">
-                   <div className="mb-6 pb-4 border-b border-white/5 shrink-0">
+                   <div className="mb-6 pb-4 border-b border-white/5 shrink-0 flex justify-between items-center">
                         <h3 className="text-xl font-bold text-white flex items-center gap-3">
                             {React.createElement(TOOLS_META.find(t => t.id === activeTool)?.icon || Briefcase, { size: 24, className: 'text-[var(--accent)]' })}
                             {TOOLS_META.find(t => t.id === activeTool)?.label}
                         </h3>
+                        
+                        {isPlaying && (
+                            <button 
+                                onClick={stopAudio} 
+                                className="flex items-center gap-2 bg-[var(--accent)] hover:opacity-90 text-white px-4 py-2 rounded-lg font-bold text-[10px] animate-pulse shadow-[0_0_20px_var(--accent-dim)]"
+                                title="Pause audio to improve typing performance"
+                            >
+                                <Power size={14} /> ENABLE EDITING MODE
+                            </button>
+                        )}
                    </div>
                    <div className="flex-1 min-h-0 overflow-hidden">
                         {renderBusinessTool()}
