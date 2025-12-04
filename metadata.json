@@ -1,0 +1,5 @@
+{
+  "name": "BEATBOY",
+  "description": "A modern, responsive desktop audio workstation for beat makers. Features bulk tagging, EQ, audio effects, and social video generation.",
+  "requestFramePermissions": []
+}
