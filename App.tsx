@@ -6,7 +6,7 @@ import {
   HelpCircle, Keyboard, Settings2, Sparkles, Type, Aperture, Palette, Video as VideoIcon,
   Move, Eye, EyeOff, MousePointer2, RefreshCw, Maximize2, Minimize2, Grid, Magnet, Briefcase,
   Calculator, FileText, Clock, ListChecks, DollarSign, Calendar, Hash, Radio, Mic, Music2, PenTool, Speaker, Copy,
-  ScrollText, Receipt, Menu, Youtube, FileSignature, Lock, Key, ShieldCheck, Laptop
+  ScrollText, Receipt, Menu, Youtube, FileSignature, Lock, Key, ShieldCheck, Laptop, Info
 } from 'lucide-react';
 import Knob from './components/Knob';
 import Waveform from './components/Waveform';
@@ -148,6 +148,7 @@ const ActivationModal: React.FC<ActivationProps> = ({ onSuccess, initialError })
             
             if (data.ok && data.activated) {
                 localStorage.setItem('beatboy_serial', serial);
+                localStorage.setItem('beatboy_activation_date', new Date().toLocaleDateString());
                 onSuccess();
             } else {
                 if (data.error === 'device_limit_reached') setError(`Device limit reached (${data.limit} devices max).`);
@@ -778,6 +779,47 @@ const NotesApp = () => {
     );
 };
 
+const LicenseTool = () => {
+    const serial = localStorage.getItem('beatboy_serial') || 'UNKNOWN';
+    const deviceId = localStorage.getItem('beatboy_device_id') || 'UNKNOWN';
+    const date = localStorage.getItem('beatboy_activation_date') || 'Unknown';
+
+    return (
+        <div className="h-full flex flex-col gap-6 p-4">
+            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl space-y-4">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <ShieldCheck className="text-[var(--accent)]" /> License Details
+                </h3>
+                <div className="space-y-2">
+                    <div className="flex justify-between border-b border-white/5 pb-2">
+                        <span className="text-zinc-500 text-xs font-bold uppercase">Serial Key</span>
+                        <span className="text-white font-mono text-sm tracking-wide">{serial}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-white/5 pb-2">
+                        <span className="text-zinc-500 text-xs font-bold uppercase">Device ID</span>
+                        <span className="text-zinc-400 font-mono text-xs">{deviceId}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-white/5 pb-2">
+                        <span className="text-zinc-500 text-xs font-bold uppercase">Activated On</span>
+                        <span className="text-white font-mono text-sm">{date}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-6 bg-red-900/10 border border-red-900/30 rounded-xl">
+                <h4 className="text-red-500 font-bold flex items-center gap-2 mb-2 text-sm">
+                    <AlertCircle size={16} /> LICENSE AGREEMENT & ABUSE POLICY
+                </h4>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                    This license is <strong>single-seat</strong> and strictly tied to this unique hardware configuration. 
+                    <br/><br/>
+                    <strong>WARNING:</strong> Unauthorized sharing, public leaking, or reselling of this serial key is a violation of terms and will result in an <strong>immediate, permanent ban</strong> across all devices without refund. Your IP address and unique hardware ID are logged for security verification.
+                </p>
+            </div>
+        </div>
+    );
+};
+
 export default function App() {
   // --- Licensing State ---
   const [isActivated, setIsActivated] = useState(false);
@@ -945,7 +987,7 @@ export default function App() {
                   } else if (isLocked) {
                       setActivationError("Session terminated. License locked by administrator.");
                   } else if (isDeactivated) {
-                      setActivationError("Session terminated. Serial has been deactivated.");
+                      setActivationError("Session terminated. Serial has been deactivated. Contact Phonicore support.");
                   } else if (data.reason === 'license_deactivated_server') {
                       setActivationError("Session terminated. License deactivated.");
                   } else {
@@ -2142,7 +2184,8 @@ Contact support@beatboy.com
     { id: 'receipt', label: 'Receipt Gen', icon: Receipt, component: <ReceiptTool /> },
     { id: 'seo', label: 'Hashtag Gen', icon: Hash, component: <HashtagTool /> },
     { id: 'desc', label: 'Desc Builder', icon: Youtube, component: <DescriptionTool /> },
-    { id: 'notes', label: 'Note Pad', icon: ScrollText, component: <NotesApp /> }
+    { id: 'notes', label: 'Note Pad', icon: ScrollText, component: <NotesApp /> },
+    { id: 'license', label: 'License Info', icon: ShieldCheck, component: <LicenseTool /> }
   ];
 
   if (isLoadingLicense) {
