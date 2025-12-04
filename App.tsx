@@ -820,6 +820,19 @@ const LicenseTool = () => {
     );
 };
 
+// Define Tool Meta outside App to prevent re-creation
+const TOOLS_META = [
+    { id: 'contract', label: 'Contract Gen', icon: FileSignature },
+    { id: 'invoice', label: 'Invoice Creator', icon: FileText },
+    { id: 'price', label: 'Price Menu', icon: Menu },
+    { id: 'splits', label: 'Split Sheet', icon: Calculator },
+    { id: 'receipt', label: 'Receipt Gen', icon: Receipt },
+    { id: 'seo', label: 'Hashtag Gen', icon: Hash },
+    { id: 'desc', label: 'Desc Builder', icon: Youtube },
+    { id: 'notes', label: 'Note Pad', icon: ScrollText },
+    { id: 'license', label: 'License Info', icon: ShieldCheck }
+];
+
 export default function App() {
   // --- Licensing State ---
   const [isActivated, setIsActivated] = useState(false);
@@ -1038,7 +1051,8 @@ export default function App() {
           // Sync Duration
           setVideoSettings(prev => ({ ...prev, videoDuration: activeFile.duration }));
           
-          // Sync Track Title Overlay
+          // Sync Track Title Overlay ONLY if not manually modified (simple check: if default)
+          // Actually, let's just do it once on load
           const title = activeFile.name.replace(/\.[^/.]+$/, "").toUpperCase();
           setVideoSettings(prev => ({
               ...prev,
@@ -1047,13 +1061,7 @@ export default function App() {
       }
   }, [activeFile]);
 
-  // Sync legacy artistName to overlay
-  useEffect(() => {
-      setVideoSettings(prev => ({
-          ...prev,
-          overlays: prev.overlays.map(o => o.id === 'producer' ? { ...o, text: `PRODUCED BY ${prev.artistName.toUpperCase()}` } : o)
-      }));
-  }, [videoSettings.artistName]);
+  // NOTE: Removed the legacy useEffect that synced artistName to overlays to fix typing glitch.
 
   // --- Keyboard Shortcuts ---
   useEffect(() => {
@@ -1890,44 +1898,83 @@ Contact support@beatboy.com
      // FIX: Use min(width, height) for radius to support 9:16
      const minDim = Math.min(width, height);
 
-     if (videoSettings.colorGrade === 'noir') {
+     // Helper for pixel manipulation
+     const filterPixels = (processor: (r:number, g:number, b:number, a:number) => [number,number,number,number]) => {
          const idata = ctx.getImageData(0,0,width,height);
          const data = idata.data;
          for(let i=0; i<data.length; i+=4) {
-             if(Math.random() > 0.9) {
-                 const v = Math.random() * 50;
-                 data[i] = Math.min(255, data[i]+v);
-                 data[i+1] = Math.min(255, data[i+1]+v);
-                 data[i+2] = Math.min(255, data[i+2]+v);
-             }
+             const [r,g,b,a] = processor(data[i], data[i+1], data[i+2], data[i+3]);
+             data[i] = r; data[i+1] = g; data[i+2] = b; data[i+3] = a;
          }
          ctx.putImageData(idata, 0, 0);
-         
+     };
+
+     if (videoSettings.colorGrade === 'noir') {
+         filterPixels((r,g,b,a) => {
+             // Add grain
+             const grain = (Math.random() - 0.5) * 30;
+             let lum = r*0.299 + g*0.587 + b*0.114;
+             lum = Math.min(255, Math.max(0, lum + grain));
+             // High contrast
+             lum = (lum - 128) * 1.5 + 128;
+             return [lum, lum, lum, a];
+         });
+         // Vignette
          const grad = ctx.createRadialGradient(cx, cy, minDim*0.4, cx, cy, minDim*0.8);
          grad.addColorStop(0, 'transparent');
          grad.addColorStop(1, 'rgba(0,0,0,0.8)');
          ctx.fillStyle = grad;
          ctx.fillRect(0,0,width,height);
      }
-     
-     if (videoSettings.colorGrade === 'dreamy') {
+     else if (videoSettings.colorGrade === 'sepia') {
+         filterPixels((r,g,b,a) => {
+             const tr = (r * 0.393) + (g * 0.769) + (b * 0.189);
+             const tg = (r * 0.349) + (g * 0.686) + (b * 0.168);
+             const tb = (r * 0.272) + (g * 0.534) + (b * 0.131);
+             return [Math.min(255, tr), Math.min(255, tg), Math.min(255, tb), a];
+         });
+     }
+     else if (videoSettings.colorGrade === 'bw') {
+         filterPixels((r,g,b,a) => {
+             const avg = (r+g+b)/3;
+             return [avg, avg, avg, a];
+         });
+     }
+     else if (videoSettings.colorGrade === 'high-contrast') {
+         const factor = (259 * (128 + 255)) / (255 * (259 - 128)); // ~2.0 contrast
+         filterPixels((r,g,b,a) => {
+             const nr = factor * (r - 128) + 128;
+             const ng = factor * (g - 128) + 128;
+             const nb = factor * (b - 128) + 128;
+             return [nr, ng, nb, a];
+         });
+     }
+     else if (videoSettings.colorGrade === 'cyberpunk') {
+         filterPixels((r,g,b,a) => {
+             // Boost pink and blue
+             return [Math.min(255, r*1.2), g*0.8, Math.min(255, b*1.4), a];
+         });
+         // Overlay scanlines
+         ctx.fillStyle = 'rgba(0, 255, 255, 0.05)';
+         for(let y=0; y<height; y+=8) ctx.fillRect(0,y,width,1);
+     }
+     else if (videoSettings.colorGrade === 'dreamy') {
          const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, minDim * 1.5);
-         grad.addColorStop(0, 'rgba(255,255,255,0.1)');
-         grad.addColorStop(1, 'transparent');
+         grad.addColorStop(0, 'rgba(255,200,200,0.15)');
+         grad.addColorStop(1, 'rgba(100,0,100,0.1)');
          ctx.fillStyle = grad;
          ctx.globalCompositeOperation = 'overlay';
          ctx.fillRect(0,0,width,height);
          ctx.globalCompositeOperation = 'source-over';
      }
-     
-     if (videoSettings.colorGrade === 'vhs') {
-         // Simple RGB Split (Chromatic Aberration)
+     else if (videoSettings.colorGrade === 'vhs' || videoSettings.colorGrade === 'glitch') {
+         // Chromatic Aberration
          const idata = ctx.getImageData(0,0,width,height);
          const data = idata.data;
-         const offset = 4 * 10; // 10 pixels roughly
+         const offset = (videoSettings.colorGrade === 'glitch' && Math.random()>0.9) ? 200 : 12; // Big jump for glitch
          const copy = new Uint8ClampedArray(data);
          for(let i=0; i<data.length; i+=4) {
-             if (i+offset < data.length) data[i] = copy[i+offset]; // R
+             if (i+offset < data.length) data[i] = copy[i+offset]; // Shift Red channel
          }
          ctx.putImageData(idata, 0, 0);
          
@@ -1936,6 +1983,32 @@ Contact support@beatboy.com
          for(let y=0; y<height; y+=4) {
              ctx.fillRect(0,y,width,2);
          }
+         
+         // Random Glitch Blocks
+         if (videoSettings.colorGrade === 'glitch' && Math.random() > 0.8) {
+             const h = Math.random() * 50;
+             const y = Math.random() * height;
+             const x = (Math.random() - 0.5) * 40;
+             try {
+                const chunk = ctx.getImageData(0, y, width, h);
+                ctx.putImageData(chunk, x, y);
+             } catch(e){}
+         }
+     }
+     else if (videoSettings.colorGrade === '1980s') {
+         filterPixels((r,g,b,a) => {
+             // Warmer, washed out
+             return [r*1.1, g, b*0.8 + 20, a];
+         });
+         // Noise overlay
+         const noiseData = ctx.getImageData(0,0,width,height);
+         for(let i=0; i<noiseData.data.length; i+=4) {
+             if(Math.random()>0.8) {
+                 const v = Math.random()*30;
+                 noiseData.data[i]+=v; noiseData.data[i+1]+=v; noiseData.data[i+2]+=v;
+             }
+         }
+         ctx.putImageData(noiseData,0,0);
      }
   };
 
@@ -2016,15 +2089,19 @@ Contact support@beatboy.com
      const x = (e.clientX - rect.left) / rect.width;
      const y = (e.clientY - rect.top) / rect.height;
 
-     const hit = videoSettings.overlays.find(o => {
-         if (!o.visible) return false;
-         const dx = x - o.x;
-         const dy = y - o.y;
-         return Math.sqrt(dx*dx + dy*dy) < 0.1;
-     });
+     // Calculate distance to all visible overlays
+     const hits = videoSettings.overlays
+         .filter(o => o.visible)
+         .map(o => ({
+             id: o.id,
+             // Simple Euclidean distance
+             dist: Math.sqrt(Math.pow(x - o.x, 2) + Math.pow(y - o.y, 2))
+         }))
+         .filter(h => h.dist < 0.15) // Slightly increased threshold for easier grabbing
+         .sort((a,b) => a.dist - b.dist); // Sort by closest
 
-     if (hit) {
-         draggingOverlayRef.current = hit.id;
+     if (hits.length > 0) {
+         draggingOverlayRef.current = hits[0].id;
          e.currentTarget.setPointerCapture(e.pointerId);
      }
   };
@@ -2037,8 +2114,15 @@ Contact support@beatboy.com
       const rawY = (e.clientY - rect.top) / rect.height;
 
       if (!draggingOverlayRef.current) {
-          const hit = videoSettings.overlays.find(o => o.visible && Math.sqrt(Math.pow(rawX-o.x,2) + Math.pow(rawY-o.y,2)) < 0.1);
-          canvas.style.cursor = hit ? 'move' : 'default';
+          // Hover state: Find closest
+          const hits = videoSettings.overlays
+             .filter(o => o.visible)
+             .map(o => ({
+                 dist: Math.sqrt(Math.pow(rawX - o.x, 2) + Math.pow(rawY - o.y, 2))
+             }))
+             .filter(h => h.dist < 0.15);
+          
+          canvas.style.cursor = hits.length > 0 ? 'move' : 'default';
           return;
       }
 
@@ -2134,7 +2218,10 @@ Contact support@beatboy.com
      const render = () => {
          const elapsed = performance.now() - startTime;
          const progress = Math.min(100, (elapsed / durationMs) * 100);
-         updateToast(toastId, { progress });
+         // Reduce toast update frequency to avoid blocking the main thread too much
+         if (Math.floor(elapsed) % 10 === 0) {
+             updateToast(toastId, { progress });
+         }
 
          if (elapsed > durationMs) {
              recorder.stop();
@@ -2175,18 +2262,21 @@ Contact support@beatboy.com
      a.click();
   };
 
-  // --- Business Tools List ---
-  const BUSINESS_TOOLS = [
-    { id: 'contract', label: 'Contract Gen', icon: FileSignature, component: <ContractTool /> },
-    { id: 'invoice', label: 'Invoice Creator', icon: FileText, component: <InvoiceTool /> },
-    { id: 'price', label: 'Price Menu', icon: Menu, component: <PriceMenuTool /> },
-    { id: 'splits', label: 'Split Sheet', icon: Calculator, component: <SplitSheetTool /> },
-    { id: 'receipt', label: 'Receipt Gen', icon: Receipt, component: <ReceiptTool /> },
-    { id: 'seo', label: 'Hashtag Gen', icon: Hash, component: <HashtagTool /> },
-    { id: 'desc', label: 'Desc Builder', icon: Youtube, component: <DescriptionTool /> },
-    { id: 'notes', label: 'Note Pad', icon: ScrollText, component: <NotesApp /> },
-    { id: 'license', label: 'License Info', icon: ShieldCheck, component: <LicenseTool /> }
-  ];
+  // Helper to render the active tool without re-mounting the component tree every time App renders
+  const renderBusinessTool = () => {
+      switch(activeTool) {
+          case 'contract': return <ContractTool />;
+          case 'invoice': return <InvoiceTool />;
+          case 'price': return <PriceMenuTool />;
+          case 'splits': return <SplitSheetTool />;
+          case 'receipt': return <ReceiptTool />;
+          case 'seo': return <HashtagTool />;
+          case 'desc': return <DescriptionTool />;
+          case 'notes': return <NotesApp />;
+          case 'license': return <LicenseTool />;
+          default: return <ContractTool />;
+      }
+  };
 
   if (isLoadingLicense) {
       return (
@@ -2287,7 +2377,7 @@ Contact support@beatboy.com
                        </div>
                        <h2 className="text-lg font-bold text-white tracking-tight leading-none">BUSINESS<br/><span className="text-[var(--accent)]">TOOLS</span></h2>
                    </div>
-                   {BUSINESS_TOOLS.map(tool => (
+                   {TOOLS_META.map(tool => (
                        <button
                           key={tool.id}
                           onClick={() => setActiveTool(tool.id)}
@@ -2303,12 +2393,12 @@ Contact support@beatboy.com
                <div className="flex-1 p-8 bg-gradient-to-br from-[#121214] to-black flex flex-col min-w-0">
                    <div className="mb-6 pb-4 border-b border-white/5 shrink-0">
                         <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                            {React.createElement(BUSINESS_TOOLS.find(t => t.id === activeTool)?.icon || Briefcase, { size: 24, className: 'text-[var(--accent)]' })}
-                            {BUSINESS_TOOLS.find(t => t.id === activeTool)?.label}
+                            {React.createElement(TOOLS_META.find(t => t.id === activeTool)?.icon || Briefcase, { size: 24, className: 'text-[var(--accent)]' })}
+                            {TOOLS_META.find(t => t.id === activeTool)?.label}
                         </h3>
                    </div>
                    <div className="flex-1 min-h-0 overflow-hidden">
-                        {BUSINESS_TOOLS.find(t => t.id === activeTool)?.component}
+                        {renderBusinessTool()}
                    </div>
                </div>
            </div>
