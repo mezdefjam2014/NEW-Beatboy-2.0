@@ -54,6 +54,7 @@ export interface VideoSettings {
   previewUrl: string | null;
   artistName: string; // Kept for backward compat
   videoDuration: number; // in seconds
+  fadeDuration: number; // Fade out duration in seconds
   
   // Advanced Visuals
   backgroundType: BackgroundType;

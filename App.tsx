@@ -4,9 +4,9 @@ import {
   Download, Video, CheckCircle2, X, 
   Film, Mic2, Layers, Archive, Activity, AlertCircle, Loader2,
   HelpCircle, Keyboard, Settings2, Sparkles, Type, Aperture, Palette, Video as VideoIcon,
-  Move, Eye, EyeOff, MousePointer2, RefreshCw, Maximize2, Minimize2, Grid, Magnet, Briefcase,
-  Calculator, FileText, Clock, ListChecks, DollarSign, Calendar, Hash, Radio, Mic, Music2, PenTool, Speaker, Copy,
-  ScrollText, Receipt, Menu, Youtube, FileSignature, Lock, Key, ShieldCheck, Laptop, Info, Power
+  Move, Eye, EyeOff, MousePointer2, RefreshCw, Maximize2, Minimize2, Grid, Magnet,
+  Clock, Radio, Mic, Music2, PenTool, Speaker, Copy,
+  Lock, Key, ShieldCheck, Laptop, Info, Power
 } from 'lucide-react';
 import Knob from './components/Knob';
 import Waveform from './components/Waveform';
@@ -60,37 +60,6 @@ const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-};
-
-const generatePDF = (title: string, content: string) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-        alert("Please allow popups to generate the PDF.");
-        return;
-    }
-    const html = `
-        <html>
-        <head>
-            <title>${title}</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-                body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #1a1a1a; }
-                .print-container { max-width: 800px; margin: 0 auto; border: 1px solid #eee; padding: 40px; }
-                @media print { .print-container { border: none; padding: 0; } }
-            </style>
-        </head>
-        <body>
-            <div class="print-container">
-                ${content}
-            </div>
-            <script>
-                setTimeout(() => { window.print(); window.close(); }, 500);
-            </script>
-        </body>
-        </html>
-    `;
-    printWindow.document.write(html);
-    printWindow.document.close();
 };
 
 const getDeviceId = () => {
@@ -247,7 +216,7 @@ const BPMButton = React.memo(() => {
     };
 
     return (
-        <div className="flex flex-col items-center gap-2 mr-6 select-none" title="Tap to calculate BPM">
+        <div className="flex flex-col items-center gap-2 select-none" title="Tap to calculate BPM">
             <button 
                 onMouseDown={handleTap}
                 className={`w-16 h-16 rounded-full border border-zinc-950 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center transition-all active:scale-95 active:shadow-inner relative overflow-hidden ${isTapped ? 'bg-[var(--accent)]' : 'bg-gradient-to-b from-zinc-800 to-zinc-900'}`}
@@ -262,591 +231,6 @@ const BPMButton = React.memo(() => {
         </div>
     );
 });
-
-// --- Business Tool Components (Memoized for Performance) ---
-const ContractTool = React.memo(() => {
-    const [data, setData] = useState({ 
-        producer: 'Beatboy', artist: '', title: '', price: '29.99', date: new Date().toISOString().split('T')[0],
-        rights: 'Non-Exclusive' 
-    });
-
-    const handleGenerate = () => {
-        const content = `
-            <div class="text-center mb-8 border-b pb-4">
-                <h1 class="text-2xl font-bold uppercase tracking-widest mb-2">Beat Lease Agreement</h1>
-                <p class="text-sm text-gray-500">Date: ${data.date}</p>
-            </div>
-            
-            <div class="mb-6 space-y-2">
-                <p><strong>Producer:</strong> ${data.producer}</p>
-                <p><strong>Artist:</strong> ${data.artist || '[Artist Name]'}</p>
-                <p><strong>Track Title:</strong> ${data.title || '[Track Title]'}</p>
-                <p><strong>License Type:</strong> ${data.rights}</p>
-            </div>
-
-            <div class="mb-6 text-sm leading-relaxed space-y-4">
-                <p><strong>1. GRANT OF LICENSE</strong><br/>The Producer hereby grants the Artist a limited, non-exclusive license to use the musical composition (the "Beat") for the creation of a new sound recording.</p>
-                
-                <p><strong>2. PAYMENT</strong><br/>The Artist shall pay the Producer a total fee of <strong>$${data.price}</strong> for this license.</p>
-                
-                <p><strong>3. RIGHTS & LIMITATIONS</strong><br/>
-                - Streaming Limit: 500,000 streams<br/>
-                - Music Videos: 1 permitted<br/>
-                - Radio Stations: 2 permitted<br/>
-                - Performance Rights: For-profit performances allowed.</p>
-                
-                <p><strong>4. CREDIT</strong><br/>The Artist must credit the Producer as "Produced by ${data.producer}" in all metadata, descriptions, and liner notes.</p>
-            </div>
-
-            <div class="mt-12 flex justify-between">
-                <div class="w-5/12 border-t border-black pt-2">
-                    <p class="font-bold mb-8">Producer Signature</p>
-                    <p>${data.producer}</p>
-                </div>
-                <div class="w-5/12 border-t border-black pt-2">
-                    <p class="font-bold mb-8">Artist Signature</p>
-                    <p>${data.artist || '(Artist Name)'}</p>
-                </div>
-            </div>
-        `;
-        generatePDF(`CONTRACT_${data.title}`, content);
-    };
-
-    return (
-        <div className="h-full flex flex-col">
-            <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">PRODUCER</label><input value={data.producer} onChange={e => setData({...data, producer: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">ARTIST</label><input value={data.artist} onChange={e => setData({...data, artist: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                <div className="col-span-2 space-y-1"><label className="text-[10px] font-bold text-zinc-500">TRACK TITLE</label><input value={data.title} onChange={e => setData({...data, title: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">PRICE ($)</label><input type="number" value={data.price} onChange={e => setData({...data, price: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">LICENSE TYPE</label>
-                    <select value={data.rights} onChange={e => setData({...data, rights: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white">
-                        <option>Non-Exclusive</option>
-                        <option>Premium Lease</option>
-                        <option>Unlimited</option>
-                        <option>Exclusive Rights</option>
-                    </select>
-                </div>
-            </div>
-            <button onClick={handleGenerate} className="mt-auto w-full bg-[var(--accent)] hover:opacity-90 text-white py-3 rounded-lg font-bold text-xs flex items-center justify-center gap-2"><FileSignature size={14}/> GENERATE PDF AGREEMENT</button>
-        </div>
-    );
-});
-
-const InvoiceTool = React.memo(() => {
-    const [data, setData] = useState({ 
-        from: 'Beatboy Productions', to: '', invNum: `INV-${Math.floor(Math.random()*10000)}`, 
-        date: new Date().toISOString().split('T')[0],
-        item: 'Custom Beat Production', amount: '150.00'
-    });
-
-    const handleGenerate = () => {
-        const content = `
-            <div class="flex justify-between items-start mb-12">
-                <div>
-                    <h1 class="text-4xl font-bold text-red-600 mb-2">INVOICE</h1>
-                    <p class="text-gray-500">#${data.invNum}</p>
-                </div>
-                <div class="text-right">
-                    <h3 class="font-bold">${data.from}</h3>
-                    <p class="text-sm text-gray-500">${data.date}</p>
-                </div>
-            </div>
-            
-            <div class="mb-8 p-4 bg-gray-50 rounded">
-                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Bill To</p>
-                <p class="font-bold text-lg">${data.to || '[Client Name]'}</p>
-            </div>
-
-            <table class="w-full mb-8">
-                <thead class="border-b-2 border-gray-200">
-                    <tr>
-                        <th class="text-left py-2">Description</th>
-                        <th class="text-right py-2">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="border-b border-gray-100">
-                        <td class="py-4">${data.item}</td>
-                        <td class="text-right py-4">$${data.amount}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="text-right">
-                <p class="text-sm text-gray-500 mb-1">Total Due</p>
-                <p class="text-3xl font-bold">$${data.amount}</p>
-            </div>
-
-            <div class="mt-12 pt-8 border-t text-center text-sm text-gray-400">
-                <p>Thank you for your business!</p>
-            </div>
-        `;
-        generatePDF(`INVOICE_${data.invNum}`, content);
-    };
-
-    return (
-        <div className="h-full flex flex-col gap-4">
-             <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">CLIENT NAME</label><input value={data.to} onChange={e => setData({...data, to: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">INVOICE #</label><input value={data.invNum} onChange={e => setData({...data, invNum: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">DATE</label><input type="date" value={data.date} onChange={e => setData({...data, date: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-             </div>
-             <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">SERVICE DESCRIPTION</label><input value={data.item} onChange={e => setData({...data, item: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-             <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">AMOUNT ($)</label><input type="number" value={data.amount} onChange={e => setData({...data, amount: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-             <button onClick={handleGenerate} className="mt-auto w-full bg-zinc-100 hover:bg-white text-black py-3 rounded-lg font-bold text-xs flex items-center justify-center gap-2"><ScrollText size={14}/> CREATE INVOICE PDF</button>
-        </div>
-    );
-});
-
-const PriceMenuTool = React.memo(() => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [prices, setPrices] = useState({ mp3: '29.99', wav: '49.99', stems: '99.99', unlim: '199.99' });
-    const [footerText, setFooterText] = useState('BUY 2 GET 1 FREE');
-    const [template, setTemplate] = useState<1 | 2 | 3 | 4 | 5>(1);
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if(!ctx) return;
-        
-        // High Res Canvas
-        canvas.width = 1080;
-        canvas.height = 1350;
-        
-        const w = canvas.width;
-        const h = canvas.height;
-        
-        // --- TEMPLATE RENDERING ---
-        
-        if (template === 1) { // Classic Red
-            // BG
-            const grad = ctx.createLinearGradient(0,0,0,h);
-            grad.addColorStop(0, '#09090b');
-            grad.addColorStop(1, '#18181b');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0,0,w,h);
-            
-            // Border
-            ctx.strokeStyle = '#dc2626'; // Red
-            ctx.lineWidth = 10;
-            ctx.strokeRect(30,30,w-60,h-60);
-
-            // Title
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 80px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('LEASING MENU', w/2, 180);
-            
-            ctx.fillStyle = '#dc2626';
-            ctx.fillRect(w/2 - 100, 210, 200, 5);
-
-        } else if (template === 2) { // Minimal Light
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0,0,w,h);
-            ctx.fillStyle = '#000';
-            ctx.font = '300 90px serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('PRICING', w/2, 200);
-
-        } else if (template === 3) { // Gold Luxury
-            const grad = ctx.createLinearGradient(0,0,w,h);
-            grad.addColorStop(0, '#000');
-            grad.addColorStop(1, '#1a1a1a');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0,0,w,h);
-            
-            ctx.strokeStyle = '#d4af37';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(50,50,w-100,h-100);
-            
-            ctx.fillStyle = '#d4af37';
-            ctx.font = 'bold 80px serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('OFFICIAL RATES', w/2, 200);
-
-        } else if (template === 4) { // Cyberpunk
-            ctx.fillStyle = '#0f0f1a';
-            ctx.fillRect(0,0,w,h);
-            // Grid
-            ctx.strokeStyle = '#ff00ff';
-            ctx.lineWidth = 1;
-            ctx.globalAlpha = 0.2;
-            for(let i=0; i<w; i+=100) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
-            for(let i=0; i<h; i+=100) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
-            ctx.globalAlpha = 1;
-            
-            ctx.fillStyle = '#00f0ff';
-            ctx.font = '900 90px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.shadowColor = '#00f0ff';
-            ctx.shadowBlur = 20;
-            ctx.fillText('LEASE BEATS', w/2, 180);
-            ctx.shadowBlur = 0;
-
-        } else if (template === 5) { // Bold Red
-            ctx.fillStyle = '#991b1b';
-            ctx.fillRect(0,0,w,h);
-            ctx.fillStyle = '#fff';
-            ctx.font = 'italic 900 100px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('BEAT STORE', w/2, 250);
-        }
-
-        // --- DRAW ITEMS ---
-        const drawItem = (y: number, title: string, price: string, accent: string, textCol: string) => {
-            ctx.fillStyle = textCol;
-            ctx.font = 'bold 50px sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(title, 100, y);
-            
-            ctx.textAlign = 'right';
-            ctx.fillStyle = accent;
-            ctx.fillText(`$${price}`, w-100, y);
-            
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 1;
-            if (template === 2) ctx.strokeStyle = '#eee';
-            if (template === 5) ctx.strokeStyle = '#ffaaaa';
-            
-            ctx.beginPath();
-            ctx.moveTo(100, y+30);
-            ctx.lineTo(w-100, y+30);
-            ctx.stroke();
-        };
-
-        const startY = 400;
-        const gap = 150;
-        
-        let accent = '#dc2626';
-        let text = '#fff';
-        if (template === 2) { accent = '#000'; text = '#333'; }
-        if (template === 3) { accent = '#d4af37'; text = '#f3e5ab'; }
-        if (template === 4) { accent = '#ff00ff'; text = '#fff'; }
-        if (template === 5) { accent = '#fff'; text = '#fff'; }
-
-        drawItem(startY, 'MP3 LEASE', prices.mp3, accent, text);
-        drawItem(startY + gap, 'WAV LEASE', prices.wav, accent, text);
-        drawItem(startY + gap*2, 'TRACK STEMS', prices.stems, accent, text);
-        drawItem(startY + gap*3, 'UNLIMITED', prices.unlim, accent, text);
-        
-        // Footer
-        ctx.fillStyle = template === 2 ? '#666' : (template === 5 ? '#ffcccc' : '#888');
-        ctx.font = 'bold 40px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(footerText, w/2, h-100);
-        
-    }, [prices, footerText, template]);
-
-    const downloadMenu = () => {
-        if(!canvasRef.current) return;
-        const url = canvasRef.current.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'PRICING_MENU.png';
-        a.click();
-    };
-
-    return (
-        <div className="h-full flex flex-col gap-4">
-             <div className="flex gap-2 mb-2 bg-zinc-900 p-1 rounded-lg shrink-0">
-                {[1,2,3,4,5].map(t => (
-                    <button 
-                        key={t}
-                        onClick={() => setTemplate(t as any)}
-                        className={`flex-1 py-1 text-[10px] font-bold rounded ${template === t ? 'bg-[var(--accent)] text-white' : 'text-zinc-500 hover:bg-zinc-800'}`}
-                    >
-                        T{t}
-                    </button>
-                ))}
-             </div>
-             <div className="grid grid-cols-2 gap-3 shrink-0">
-                 <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">MP3 PRICE</label><input value={prices.mp3} onChange={e => setPrices({...prices, mp3: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                 <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">WAV PRICE</label><input value={prices.wav} onChange={e => setPrices({...prices, wav: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                 <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">STEMS PRICE</label><input value={prices.stems} onChange={e => setPrices({...prices, stems: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                 <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">UNLIMITED PRICE</label><input value={prices.unlim} onChange={e => setPrices({...prices, unlim: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-             </div>
-             <div className="space-y-1 shrink-0"><label className="text-[10px] font-bold text-zinc-500">FOOTER TEXT</label><input value={footerText} onChange={e => setFooterText(e.target.value)} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-             
-             {/* Canvas Container with Scroll */}
-             <div className="flex-1 min-h-0 overflow-y-auto bg-zinc-900 rounded-lg border border-zinc-800 p-2">
-                 <div className="flex items-center justify-center min-h-full">
-                    <canvas ref={canvasRef} className="h-[400px] w-auto object-contain shadow-lg" />
-                 </div>
-             </div>
-             
-             <button onClick={downloadMenu} className="w-full bg-[var(--accent)] hover:opacity-90 text-white py-3 rounded-lg font-bold text-xs flex items-center justify-center gap-2 shrink-0"><ImageIcon size={14}/> DOWNLOAD MENU IMAGE</button>
-        </div>
-    );
-});
-
-const SplitSheetTool = React.memo(() => {
-    const [collaborators, setCollaborators] = useState([{role: 'Producer', percent: 50}, {role: 'Artist', percent: 50}]);
-    
-    const updatePercent = (idx: number, val: number) => {
-        const newCollabs = [...collaborators];
-        newCollabs[idx].percent = val;
-        setCollaborators(newCollabs);
-    };
-
-    const total = collaborators.reduce((a,b) => a + b.percent, 0);
-
-    const handleDownloadSplits = () => {
-        const headers = "Role,Percentage\n";
-        const rows = collaborators.map(c => `${c.role},${c.percent}%`).join("\n");
-        const blob = new Blob([headers + rows], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'SPLIT_SHEET.csv';
-        a.click();
-    };
-
-    return (
-        <div className="h-full flex flex-col">
-             <div className="flex justify-between items-center mb-4">
-                 <span className="text-xs font-bold text-white">Publishing Splits</span>
-                 <span className={`text-xs font-bold ${total === 100 ? 'text-[var(--accent)]' : 'text-zinc-500'}`}>{total}%</span>
-             </div>
-             <div className="space-y-2 flex-1 overflow-y-auto mb-4">
-                 {collaborators.map((c, i) => (
-                     <div key={i} className="flex gap-2">
-                         <input type="text" value={c.role} onChange={e => {
-                             const n = [...collaborators]; n[i].role = e.target.value; setCollaborators(n);
-                         }} className="flex-1 bg-black border border-zinc-800 rounded px-2 py-2 text-xs text-white" />
-                         <div className="flex items-center gap-1">
-                             <input type="number" value={c.percent} onChange={e => updatePercent(i, Number(e.target.value))} className="w-12 bg-black border border-zinc-800 rounded px-1 py-2 text-right text-xs text-white" />
-                             <span className="text-zinc-500 text-xs">%</span>
-                         </div>
-                     </div>
-                 ))}
-                 <button onClick={() => setCollaborators([...collaborators, {role: 'New Person', percent: 0}])} className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-[10px] font-bold mt-2 text-zinc-300">+ ADD COLLABORATOR</button>
-             </div>
-             <button onClick={handleDownloadSplits} className="w-full py-3 bg-zinc-100 hover:bg-white text-black rounded-lg text-xs font-bold flex items-center justify-center gap-2"><Download size={14}/> DOWNLOAD CSV</button>
-        </div>
-    );
-});
-
-const ReceiptTool = React.memo(() => {
-    const [data, setData] = useState({ 
-        id: `TX-${Math.floor(Math.random()*100000)}`, item: 'Untagged WAV Lease', price: '49.99', date: new Date().toISOString().split('T')[0] 
-    });
-
-    const handleGenerate = () => {
-        const content = `
-            <div class="text-center mb-8">
-                <h2 class="text-xl font-bold mb-2">RECEIPT</h2>
-                <p class="text-sm text-gray-500">Transaction ID: ${data.id}</p>
-                <p class="text-sm text-gray-500">Date: ${data.date}</p>
-            </div>
-            
-            <div class="border-t border-b border-gray-200 py-4 mb-4">
-                <div class="flex justify-between mb-2">
-                    <span class="font-bold">${data.item}</span>
-                    <span>$${data.price}</span>
-                </div>
-            </div>
-            
-            <div class="flex justify-between text-lg font-bold">
-                <span>TOTAL PAID</span>
-                <span>$${data.price}</span>
-            </div>
-            
-            <div class="mt-8 text-center">
-                <p class="text-xs text-gray-400">Thank you for your purchase.</p>
-            </div>
-        `;
-        generatePDF(`RECEIPT_${data.id}`, content);
-    };
-
-    return (
-        <div className="h-full flex flex-col gap-4">
-            <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">ITEM PURCHASED</label><input value={data.item} onChange={e => setData({...data, item: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-            <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">PRICE ($)</label><input type="number" value={data.price} onChange={e => setData({...data, price: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-            <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">TRANSACTION ID</label><input value={data.id} onChange={e => setData({...data, id: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-            <button onClick={handleGenerate} className="mt-auto w-full bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-lg font-bold text-xs flex items-center justify-center gap-2"><Receipt size={14}/> GENERATE RECEIPT PDF</button>
-        </div>
-    );
-});
-
-const HashtagTool = React.memo(() => {
-    const [genre, setGenre] = useState('Trap');
-    const [mood, setMood] = useState('Dark');
-    const [keywords, setKeywords] = useState('');
-    const [result, setResult] = useState({ title: '', tags: '' });
-
-    const generate = () => {
-        const extra = keywords ? ` ${keywords}` : '';
-        const contextTags = keywords ? keywords.split(' ').filter(k => k.length > 2).map(k => `#${k.replace(/[^a-zA-Z0-9]/g, '')}`).join(' ') : '';
-        
-        const title = `FREE ${mood} ${genre} Type Beat${extra} - "VISION" | Hard ${genre} Instrumental 2024`;
-        const tags = `#${genre.toLowerCase()}typebeat #${mood.toLowerCase()}beat ${contextTags} #freebeat #instrumental #${genre.toLowerCase()} #producer #newbeat`;
-        setResult({ title, tags });
-    };
-
-    return (
-        <div className="h-full flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">GENRE</label>
-                    <select value={genre} onChange={e => setGenre(e.target.value)} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white">
-                        <option>Trap</option><option>Drill</option><option>R&B</option><option>LoFi</option><option>Boombap</option>
-                    </select>
-                </div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">MOOD/VIBE</label><input value={mood} onChange={e => setMood(e.target.value)} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-            </div>
-            
-            <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-500">CONTEXT / KEYWORDS (OPTIONAL)</label>
-                <textarea 
-                    value={keywords} 
-                    onChange={e => setKeywords(e.target.value)} 
-                    className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white h-16 resize-none focus:outline-none focus:border-[var(--accent)]"
-                    placeholder="e.g. fast paced, dark piano, hard 808s, for Drake"
-                />
-            </div>
-
-            <button onClick={generate} className="w-full bg-[var(--accent)] hover:opacity-90 text-white py-2 rounded font-bold text-xs">GENERATE SEO</button>
-            
-            <div className="flex-1 bg-black rounded border border-zinc-800 p-3 space-y-4">
-                <div>
-                    <label className="text-[9px] font-bold text-zinc-500 block mb-1">OPTIMIZED TITLE</label>
-                    <div className="flex gap-2">
-                        <input value={result.title} readOnly className="flex-1 bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-white" />
-                        <button onClick={() => navigator.clipboard.writeText(result.title)} className="px-3 bg-zinc-800 rounded hover:bg-zinc-700"><Copy size={12}/></button>
-                    </div>
-                </div>
-                <div>
-                    <label className="text-[9px] font-bold text-zinc-500 block mb-1">OPTIMIZED TAGS</label>
-                    <div className="flex gap-2">
-                        <textarea value={result.tags} readOnly className="flex-1 bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-white h-20 resize-none" />
-                        <button onClick={() => navigator.clipboard.writeText(result.tags)} className="px-3 bg-zinc-800 rounded hover:bg-zinc-700"><Copy size={12}/></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-});
-
-const DescriptionTool = React.memo(() => {
-    const [data, setData] = useState({ link: 'beatstars.com/beat', bpm: '140', key: 'C Minor', website: 'www.beatboy.com', email: 'contact@beatboy.com' });
-    const [output, setOutput] = useState('');
-
-    const generate = () => {
-        setOutput(`
-🎹 Purchase Link (Untagged): ${data.link}
-🌐 Website: ${data.website}
-📧 Contact: ${data.email}
-
-Information:
-BPM: ${data.bpm}
-Key: ${data.key}
-
-USAGE:
-Absolutely ANY USE of this beat (Including leasing) REQUIRES CREDIT (Prod. by Beatboy). There are NO exceptions.
-
-Socials:
-Instagram: @beatboy
-Twitter: @beatboy
-
-#producer #typebeat #instrumental
-        `.trim());
-    };
-
-    return (
-        <div className="h-full flex flex-col gap-4">
-             <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">PURCHASE LINK</label><input value={data.link} onChange={e => setData({...data, link: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">WEBSITE</label><input value={data.website} onChange={e => setData({...data, website: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">EMAIL</label><input value={data.email} onChange={e => setData({...data, email: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">BPM</label><input value={data.bpm} onChange={e => setData({...data, bpm: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-                <div className="space-y-1"><label className="text-[10px] font-bold text-zinc-500">KEY</label><input value={data.key} onChange={e => setData({...data, key: e.target.value})} className="w-full bg-black border border-zinc-700 rounded p-2 text-xs text-white"/></div>
-             </div>
-             <button onClick={generate} className="w-full bg-[var(--accent)] hover:opacity-90 text-white py-2 rounded font-bold text-xs flex items-center justify-center gap-2"><Youtube size={14}/> GENERATE DESCRIPTION</button>
-             <textarea value={output} onChange={e => setOutput(e.target.value)} className="flex-1 bg-black border border-zinc-800 rounded p-3 text-xs text-zinc-300 font-mono resize-none focus:outline-none" placeholder="Generated description will appear here..." />
-             <button onClick={() => navigator.clipboard.writeText(output)} className="w-full bg-zinc-800 hover:bg-zinc-700 py-2 rounded text-xs font-bold">COPY TO CLIPBOARD</button>
-        </div>
-    );
-});
-
-const NotesApp = React.memo(() => {
-    const [notes, setNotes] = useState("");
-    
-    useEffect(() => {
-        const saved = localStorage.getItem('beatboy_notes');
-        if (saved) setNotes(saved);
-    }, []);
-
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setNotes(e.target.value);
-        localStorage.setItem('beatboy_notes', e.target.value);
-    };
-
-    return (
-        <div className="h-full flex flex-col gap-2">
-            <textarea 
-                value={notes} 
-                onChange={handleChange}
-                className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-xs resize-none focus:outline-none focus:border-[var(--accent)] leading-relaxed font-mono text-zinc-300 shadow-inner" 
-                placeholder="Session notes, lyrics, to-do list... (Auto-saved)"
-            ></textarea>
-        </div>
-    );
-});
-
-const LicenseTool = React.memo(() => {
-    const serial = localStorage.getItem('beatboy_serial') || 'UNKNOWN';
-    const deviceId = localStorage.getItem('beatboy_device_id') || 'UNKNOWN';
-    const date = localStorage.getItem('beatboy_activation_date') || 'Unknown';
-
-    return (
-        <div className="h-full flex flex-col gap-6 p-4">
-            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl space-y-4">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <ShieldCheck className="text-[var(--accent)]" /> License Details
-                </h3>
-                <div className="space-y-2">
-                    <div className="flex justify-between border-b border-white/5 pb-2">
-                        <span className="text-zinc-500 text-xs font-bold uppercase">Serial Key</span>
-                        <span className="text-white font-mono text-sm tracking-wide">{serial}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-white/5 pb-2">
-                        <span className="text-zinc-500 text-xs font-bold uppercase">Device ID</span>
-                        <span className="text-zinc-400 font-mono text-xs">{deviceId}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-white/5 pb-2">
-                        <span className="text-zinc-500 text-xs font-bold uppercase">Activated On</span>
-                        <span className="text-white font-mono text-sm">{date}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="p-6 bg-red-900/10 border border-red-900/30 rounded-xl">
-                <h4 className="text-red-500 font-bold flex items-center gap-2 mb-2 text-sm">
-                    <AlertCircle size={16} /> LICENSE AGREEMENT & ABUSE POLICY
-                </h4>
-                <p className="text-zinc-400 text-xs leading-relaxed">
-                    This license is <strong>single-seat</strong> and strictly tied to this unique hardware configuration. 
-                    <br/><br/>
-                    <strong>WARNING:</strong> Unauthorized sharing, public leaking, or reselling of this serial key is a violation of terms and will result in an <strong>immediate, permanent ban</strong> across all devices without refund. Your IP address and unique hardware ID are logged for security verification.
-                </p>
-            </div>
-        </div>
-    );
-});
-
-// Define Tool Meta outside App to prevent re-creation
-const TOOLS_META = [
-    { id: 'contract', label: 'Contract Gen', icon: FileSignature },
-    { id: 'invoice', label: 'Invoice Creator', icon: FileText },
-    { id: 'price', label: 'Price Menu', icon: Menu },
-    { id: 'splits', label: 'Split Sheet', icon: Calculator },
-    { id: 'receipt', label: 'Receipt Gen', icon: Receipt },
-    { id: 'seo', label: 'Hashtag Gen', icon: Hash },
-    { id: 'desc', label: 'Desc Builder', icon: Youtube },
-    { id: 'notes', label: 'Note Pad', icon: ScrollText },
-    { id: 'license', label: 'License Info', icon: ShieldCheck }
-];
 
 export default function App() {
   // --- Licensing State ---
@@ -866,9 +250,8 @@ export default function App() {
   const [dragActive, setDragActive] = useState<DragZone>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [showHelp, setShowHelp] = useState(false);
-  const [showBusinessTools, setShowBusinessTools] = useState(false);
+  
   const [showThemeMenu, setShowThemeMenu] = useState(false);
-  const [activeTool, setActiveTool] = useState('contract');
   const [videoTab, setVideoTab] = useState<'visual' | 'assets' | 'text'>('visual');
   const [isExpandedPreview, setIsExpandedPreview] = useState(false);
 
@@ -891,6 +274,7 @@ export default function App() {
     previewUrl: null,
     artistName: "BEATBOY",
     videoDuration: 0,
+    fadeDuration: 2, // Default fade out duration (logic removed, keep for type safety)
     backgroundType: 'image',
     backgroundUrl: null,
     logoUrl: null,
@@ -1063,20 +447,14 @@ export default function App() {
   // Sync Video Settings to Loaded File
   useEffect(() => {
       if (activeFile) {
-          // Sync Duration
-          setVideoSettings(prev => ({ ...prev, videoDuration: activeFile.duration }));
-          
-          // Sync Track Title Overlay ONLY if not manually modified (simple check: if default)
-          // Actually, let's just do it once on load
           const title = activeFile.name.replace(/\.[^/.]+$/, "").toUpperCase();
           setVideoSettings(prev => ({
               ...prev,
+              videoDuration: activeFile.duration,
               overlays: prev.overlays.map(o => o.id === 'title' ? { ...o, text: title } : o)
           }));
       }
   }, [activeFile]);
-
-  // NOTE: Removed the legacy useEffect that synced artistName to overlays to fix typing glitch.
 
   // --- Keyboard Shortcuts ---
   useEffect(() => {
@@ -1146,13 +524,6 @@ FEATURES
 - Editor: Click the "Maximize" button to open the full-screen editor.
 - Text Layout: You can drag "Track Title", "Producer Name", and "Price Card" directly on the preview to position them.
 - Generate: Click "Generate Video" to render a social-media ready video (16:9 or 9:16).
-
-4. BUSINESS TOOLS
-- Click the "Business Tools" button at the bottom center.
-- Contract Gen: Create PDF lease agreements.
-- Invoice/Receipt: Generate professional financial documents.
-- Price Menu: Create a high-res pricing menu for Instagram.
-- Split Sheet: Calculate and export CSVs for publishing splits.
 
 NEED HELP?
 Contact support@beatboy.com
@@ -2190,6 +1561,8 @@ Contact support@beatboy.com
      const dest = audioCtxRef.current!.createMediaStreamDestination();
      const source = audioCtxRef.current!.createBufferSource();
      source.buffer = processedAudio;
+     
+     // Direct connection to ensure clean audio recording without fade artifacts
      source.connect(dest);
 
      const canvasStream = canvas.captureStream(fps);
@@ -2198,19 +1571,27 @@ Contact support@beatboy.com
          ...dest.stream.getAudioTracks()
      ]);
 
-     const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') ? 'video/webm; codecs=vp9' : 'video/webm';
-     const recorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 5000000 }); // 5Mbps
+     // Use standard WebM which is reliably supported for audio+video recording in browsers
+     const mimeType = 'video/webm';
+
+     const recorder = new MediaRecorder(combinedStream, { 
+         mimeType, 
+         videoBitsPerSecond: 5000000
+     });
      const chunks: Blob[] = [];
      
      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
      recorder.onstop = () => {
-         const blob = new Blob(chunks, { type: 'video/webm' });
+         const blob = new Blob(chunks, { type: mimeType });
          const url = URL.createObjectURL(blob);
          setVideoSettings(prev => ({ ...prev, isGenerating: false, previewUrl: url }));
          removeToast(toastId);
-         showSuccessToast('Video Ready', 'Preview generated successfully.');
+         showSuccessToast('Video Ready', 'Preview generated successfully (WebM).');
      };
 
+     const renderDurationSec = videoSettings.videoDuration > 0 ? videoSettings.videoDuration : processedAudio.duration;
+     const durationMs = renderDurationSec * 1000;
+     
      source.start();
      recorder.start();
      
@@ -2221,13 +1602,10 @@ Contact support@beatboy.com
 
      const analyser = audioCtxRef.current!.createAnalyser();
      analyser.fftSize = 512;
-     source.connect(analyser);
+     source.connect(analyser); // Connect pre-fader source to visualizer so visuals don't die early
      const dataArray = new Uint8Array(analyser.frequencyBinCount);
      const timeDataArray = new Uint8Array(analyser.frequencyBinCount);
 
-     const renderDurationSec = videoSettings.videoDuration > 0 ? videoSettings.videoDuration : processedAudio.duration;
-     const durationMs = renderDurationSec * 1000;
-     
      const startTime = performance.now();
 
      const render = () => {
@@ -2248,7 +1626,9 @@ Contact support@beatboy.com
          analyser.getByteFrequencyData(dataArray);
          analyser.getByteTimeDomainData(timeDataArray);
          
-         if (ctx) drawVideoFrame(ctx, width, height, elapsed, dataArray, timeDataArray);
+         if (ctx) {
+             drawVideoFrame(ctx, width, height, elapsed, dataArray, timeDataArray);
+         }
          requestAnimationFrame(render);
      };
      render();
@@ -2275,22 +1655,6 @@ Contact support@beatboy.com
      a.href = url;
      a.download = `THUMBNAIL_${videoSettings.artistName}.png`;
      a.click();
-  };
-
-  // Helper to render the active tool without re-mounting the component tree every time App renders
-  const renderBusinessTool = () => {
-      switch(activeTool) {
-          case 'contract': return <ContractTool />;
-          case 'invoice': return <InvoiceTool />;
-          case 'price': return <PriceMenuTool />;
-          case 'splits': return <SplitSheetTool />;
-          case 'receipt': return <ReceiptTool />;
-          case 'seo': return <HashtagTool />;
-          case 'desc': return <DescriptionTool />;
-          case 'notes': return <NotesApp />;
-          case 'license': return <LicenseTool />;
-          default: return <ContractTool />;
-      }
   };
 
   if (isLoadingLicense) {
@@ -2371,61 +1735,6 @@ Contact support@beatboy.com
                >
                    <Download size={14} /> DOWNLOAD USER GUIDE (TXT)
                </button>
-           </div>
-        </div>
-      )}
-
-      {/* BUSINESS TOOLS MODAL */}
-      {showBusinessTools && (
-        <div className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-8 animate-in fade-in duration-200" onClick={() => setShowBusinessTools(false)}>
-           <div className="bg-[#121214] border border-[var(--border)] rounded-2xl max-w-7xl w-full h-[85vh] flex shadow-[0_0_50px_var(--accent-dim)] relative overflow-hidden" onClick={e => e.stopPropagation()}>
-               {/* Close Button */}
-               <button onClick={() => setShowBusinessTools(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white z-10" title="Close Business Tools">
-                  <X size={20} />
-               </button>
-
-               {/* Sidebar */}
-               <div className="w-64 bg-black/40 border-r border-white/5 p-4 flex flex-col gap-2 overflow-y-auto">
-                   <div className="flex items-center gap-3 mb-4 px-2">
-                       <div className="p-2 bg-[var(--accent-dim)] rounded-lg">
-                           <Briefcase className="text-[var(--accent)]" size={20} />
-                       </div>
-                       <h2 className="text-lg font-bold text-white tracking-tight leading-none">BUSINESS<br/><span className="text-[var(--accent)]">TOOLS</span></h2>
-                   </div>
-                   {TOOLS_META.map(tool => (
-                       <button
-                          key={tool.id}
-                          onClick={() => setActiveTool(tool.id)}
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${activeTool === tool.id ? 'bg-[var(--accent)] text-white shadow-lg' : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-300'}`}
-                       >
-                           <tool.icon size={14} />
-                           {tool.label}
-                       </button>
-                   ))}
-               </div>
-
-               {/* Content Area */}
-               <div className="flex-1 p-8 bg-gradient-to-br from-[#121214] to-black flex flex-col min-w-0">
-                   <div className="mb-6 pb-4 border-b border-white/5 shrink-0 flex justify-between items-center">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                            {React.createElement(TOOLS_META.find(t => t.id === activeTool)?.icon || Briefcase, { size: 24, className: 'text-[var(--accent)]' })}
-                            {TOOLS_META.find(t => t.id === activeTool)?.label}
-                        </h3>
-                        
-                        {isPlaying && (
-                            <button 
-                                onClick={stopAudio} 
-                                className="flex items-center gap-2 bg-[var(--accent)] hover:opacity-90 text-white px-4 py-2 rounded-lg font-bold text-[10px] animate-pulse shadow-[0_0_20px_var(--accent-dim)]"
-                                title="Pause audio to improve typing performance"
-                            >
-                                <Power size={14} /> ENABLE EDITING MODE
-                            </button>
-                        )}
-                   </div>
-                   <div className="flex-1 min-h-0 overflow-hidden">
-                        {renderBusinessTool()}
-                   </div>
-               </div>
            </div>
         </div>
       )}
@@ -2564,8 +1873,10 @@ Contact support@beatboy.com
         {/* EQ SECTION (TOP) */}
         <div className="h-40 border-b border-[var(--border)] bg-gradient-to-b from-[#121214] to-[#0c0c0e] flex items-center justify-center px-8 shadow-md relative z-10 shrink-0">
            
-           {/* BPM TAPPER LEFT */}
-           <BPMButton />
+           <div className="flex items-center mr-8 gap-4">
+               {/* BPM TAPPER LEFT */}
+               <BPMButton />
+           </div>
 
            <div className="flex items-center gap-8 transform scale-90 lg:scale-100 transition-transform">
                <Knob label="Low" subLabel="60Hz" value={eqSettings.low} min={-MAX_EQ_DB} max={MAX_EQ_DB} onChange={v => setEqSettings(prev => ({...prev, low: v}))} title="Low Frequency Gain" />
@@ -2789,22 +2100,12 @@ Contact support@beatboy.com
                     </div>
                 </div>
                 
-                {/* SPACER for Button */}
+                {/* SPACER for Button (kept for padding) */}
                 <div className="h-10"></div>
             </div>
         </div>
         
-        {/* BUSINESS TOOLS FOOTER BUTTON (FIXED POS IN FLEX) */}
-        <div className="p-4 bg-[var(--bg-main)] border-t border-[var(--border)] flex items-center justify-center z-20 shrink-0">
-             <button 
-                  onClick={() => setShowBusinessTools(true)}
-                  className="px-8 py-2.5 bg-[#121214] border border-[var(--accent)] rounded-full hover:bg-[var(--accent-dim)] transition-all flex items-center gap-2 group shadow-lg shadow-black/40"
-                  title="Open Business Suite"
-              >
-                  <Briefcase size={16} className="text-[var(--accent)] group-hover:scale-110 transition-transform" />
-                  <span className="text-[10px] font-bold text-[var(--accent)] tracking-wider">BUSINESS TOOLS</span>
-              </button>
-        </div>
+        {/* FOOTER REMOVED (Previous location of Business Tools Button) */}
 
       </div>
 
@@ -2999,7 +2300,14 @@ Contact support@beatboy.com
                             step="1"
                             value={videoSettings.videoDuration}
                             disabled={!activeFile}
-                            onChange={(e) => setVideoSettings(p => ({...p, videoDuration: parseFloat(e.target.value)}))}
+                            onChange={(e) => setVideoSettings(p => {
+                                const newDuration = parseFloat(e.target.value);
+                                return {
+                                    ...p, 
+                                    videoDuration: newDuration,
+                                    fadeDuration: Math.min(p.fadeDuration, newDuration) // Clamp fade
+                                };
+                            })}
                             className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer disabled:opacity-50"
                         />
                     </div>
