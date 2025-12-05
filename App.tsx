@@ -6,7 +6,7 @@ import {
   HelpCircle, Keyboard, Settings2, Sparkles, Type, Aperture, Palette, Video as VideoIcon,
   Move, Eye, EyeOff, MousePointer2, RefreshCw, Maximize2, Minimize2, Grid, Magnet,
   Clock, Radio, Mic, Music2, PenTool, Speaker, Copy,
-  Lock, Key, ShieldCheck, Laptop, Info, Power
+  Lock, Key, ShieldCheck, Laptop, Info, Power, Globe, Mail, Youtube
 } from 'lucide-react';
 import Knob from './components/Knob';
 import Waveform from './components/Waveform';
@@ -71,16 +71,17 @@ const getDeviceId = () => {
     return id;
 };
 
-// --- ACTIVATION COMPONENT ---
+// --- LANDING SCREEN (ACTIVATION) ---
 interface ActivationProps {
     onSuccess: () => void;
     initialError?: string | null;
 }
 
-const ActivationModal: React.FC<ActivationProps> = ({ onSuccess, initialError }) => {
+const LandingScreen: React.FC<ActivationProps> = ({ onSuccess, initialError }) => {
     const [serial, setSerial] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(initialError || null);
+    const [tab, setTab] = useState<'activate' | 'about' | 'pricing' | 'contact'>('activate');
 
     // Update error if prop changes
     useEffect(() => {
@@ -132,60 +133,193 @@ const ActivationModal: React.FC<ActivationProps> = ({ onSuccess, initialError })
     };
 
     return (
-        <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-                {/* Background Glow */}
-                <div className="absolute -top-20 -left-20 w-60 h-60 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
-                
-                <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center border border-zinc-700 mb-6 shadow-inner">
-                        <Lock className="text-red-500" size={32} />
+        <div className="fixed inset-0 z-[9999] bg-[#09090b] text-white flex flex-col font-sans overflow-y-auto custom-scrollbar">
+            {/* Background Effects */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-800 via-black to-black opacity-50 pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent opacity-20" />
+            
+            {/* Header / Nav */}
+            <header className="relative z-10 container mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-3 select-none cursor-pointer" onClick={() => setTab('activate')}>
+                    <div className="bg-red-600 p-2 rounded-xl shadow-lg shadow-red-900/50">
+                        <Music size={24} className="text-white" />
                     </div>
-                    
-                    <h1 className="text-2xl font-black text-white mb-2 tracking-tight">ACTIVATE BEATBOY</h1>
-                    <p className="text-zinc-500 text-sm mb-8">Enter your serial key to unlock the workstation.</p>
+                    <span className="text-2xl font-black tracking-tighter">BEATBOY</span>
+                </div>
+                
+                <nav className="flex items-center gap-1 bg-zinc-900/80 p-1.5 rounded-full border border-zinc-800 backdrop-blur-md">
+                    {[
+                        { id: 'activate', label: 'Activate' },
+                        { id: 'about', label: 'About' },
+                        { id: 'pricing', label: 'Pricing' },
+                        { id: 'contact', label: 'Contact' }
+                    ].map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => setTab(item.id as any)}
+                            className={`px-6 py-2 rounded-full text-xs font-bold transition-all ${tab === item.id ? 'bg-zinc-100 text-black shadow-lg' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
+                        >
+                            {item.label}
+                        </button>
+                    ))}
+                </nav>
+            </header>
 
-                    <div className="w-full space-y-4">
-                        <div className="relative">
-                            <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                            <input 
-                                type="text" 
-                                value={serial}
-                                onChange={handleInput}
-                                placeholder="XXX-XXX-XXX"
-                                className="w-full bg-black border border-zinc-700 text-white font-mono text-center text-xl py-4 rounded-xl focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 tracking-widest placeholder-zinc-700"
-                            />
+            {/* Main Content */}
+            <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 min-h-[600px]">
+                
+                {/* ACTIVATE TAB */}
+                {tab === 'activate' && (
+                    <div className="max-w-md w-full animate-in fade-in slide-in-from-bottom-8 duration-500">
+                        <div className="text-center mb-10">
+                            <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500">
+                                UNLOCK YOUR<br/>WORKSTATION
+                            </h1>
+                            <p className="text-zinc-400 text-lg">Enter your serial key to begin.</p>
                         </div>
 
-                        {error && (
-                            <div className="flex flex-col gap-1 text-red-500 bg-red-500/10 p-4 rounded-lg text-xs font-bold justify-center items-center animate-in fade-in slide-in-from-top-1 text-center">
-                                <div className="flex items-center gap-2">
-                                    <AlertCircle size={14} /> <span>{error}</span>
+                        <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl shadow-2xl backdrop-blur-xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                            
+                            <div className="space-y-6 relative z-10">
+                                <div>
+                                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-2 mb-2 block">Serial Key</label>
+                                    <div className="relative">
+                                        <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                                        <input 
+                                            type="text" 
+                                            value={serial}
+                                            onChange={handleInput}
+                                            placeholder="XXX-XXX-XXX"
+                                            className="w-full bg-black border border-zinc-700 text-white font-mono text-center text-xl py-4 rounded-xl focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 tracking-widest placeholder-zinc-800 transition-all"
+                                        />
+                                    </div>
                                 </div>
-                                {error.includes('Phonicore') && (
-                                    <a href="https://phonicore.com" target="_blank" rel="noreferrer" className="underline mt-1 hover:text-red-400">
-                                        https://phonicore.com/
-                                    </a>
-                                )}
-                            </div>
-                        )}
 
-                        <button 
-                            onClick={activate}
-                            disabled={loading || serial.length < 11}
-                            className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            {loading ? <Loader2 className="animate-spin" size={20}/> : <ShieldCheck size={20} />}
-                            {loading ? 'VALIDATING...' : 'ACTIVATE LICENSE'}
-                        </button>
+                                {error && (
+                                    <div className="flex items-center gap-3 text-red-400 bg-red-950/30 border border-red-900/50 p-4 rounded-xl text-xs font-bold justify-center animate-in zoom-in-95">
+                                        <AlertCircle size={16} /> <span>{error}</span>
+                                    </div>
+                                )}
+
+                                <button 
+                                    onClick={activate}
+                                    disabled={loading || serial.length < 11}
+                                    className="w-full bg-white hover:bg-zinc-200 text-black font-black py-4 rounded-xl shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center gap-3 text-sm tracking-wide"
+                                >
+                                    {loading ? <Loader2 className="animate-spin" size={18}/> : <ShieldCheck size={18} />}
+                                    {loading ? 'VALIDATING...' : 'ACTIVATE LICENSE'}
+                                </button>
+                            </div>
+                        </div>
+                        <div className="mt-8 text-center">
+                            <p className="text-zinc-600 text-[10px] uppercase tracking-widest">
+                                <Laptop size={12} className="inline mr-2 mb-0.5" />
+                                Device ID: {getDeviceId().slice(0,8)}
+                            </p>
+                        </div>
                     </div>
-                    
-                    <div className="mt-8 flex items-center gap-2 text-[10px] text-zinc-600">
-                        <Laptop size={12} />
-                        <span>Device ID: {getDeviceId().slice(0,8)}...</span>
+                )}
+
+                {/* ABOUT TAB */}
+                {tab === 'about' && (
+                    <div className="max-w-4xl w-full animate-in fade-in slide-in-from-bottom-8 duration-500">
+                        <div className="text-center mb-12">
+                            <h2 className="text-4xl font-black mb-4">THE MODERN AUDIO SUITE</h2>
+                            <div className="space-y-4 max-w-2xl mx-auto text-zinc-400 leading-relaxed">
+                                <p>
+                                    Beatboy is the ultimate browser-based audio workstation designed specifically for beatmakers and content creators. 
+                                    We've stripped away the bloat of traditional DAWs to focus purely on what matters: finishing and packaging your beats.
+                                </p>
+                                <p>
+                                    With a powerful audio engine running entirely on your device, you get zero-latency EQ, professional limiting, and instant visual feedback. 
+                                    Whether you're batch processing an entire folder of beats for sale or creating viral visualizers for social media, Beatboy streamlines your workflow so you can focus on creating.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {[
+                                { title: "Visual Studio", desc: "Create social-ready videos (16:9 & 9:16) with audio reactive visualizers.", icon: Film },
+                                { title: "Audio Engine", desc: "Professional EQ, Limiter, Normalization, and Fade controls built-in.", icon: Settings2 },
+                                { title: "Bulk Processing", desc: "Tag and export hundreds of beats in seconds with custom voice tags.", icon: Layers },
+                            ].map((feature, i) => (
+                                <div key={i} className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl hover:bg-zinc-900 transition-colors">
+                                    <div className="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center mb-4 text-white">
+                                        <feature.icon size={24} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+                                    <p className="text-sm text-zinc-400 leading-relaxed">{feature.desc}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </div>
+                )}
+
+                {/* PRICING TAB */}
+                {tab === 'pricing' && (
+                    <div className="max-w-md w-full animate-in fade-in slide-in-from-bottom-8 duration-500">
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center relative overflow-hidden">
+                            <div className="absolute top-0 left-0 right-0 h-2 bg-red-600" />
+                            <div className="inline-block bg-zinc-800 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-6">Lifetime Access</div>
+                            <h2 className="text-6xl font-black text-white mb-2">$19.99</h2>
+                            <p className="text-zinc-500 text-sm mb-8">per seat / one-time payment</p>
+                            
+                            <ul className="text-left space-y-4 mb-8 max-w-xs mx-auto">
+                                {[
+                                    "Unlimited Audio Exports",
+                                    "4K Video Rendering",
+                                    "Bulk Tagging & Processing",
+                                    "All Visualizers Included",
+                                    "Free Updates Forever"
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-sm text-zinc-300">
+                                        <CheckCircle2 size={16} className="text-red-500 shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <button onClick={() => setTab('activate')} className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-zinc-200 transition-colors">
+                                I Have a Key
+                            </button>
+                            <p className="text-[10px] text-zinc-600 mt-4">Secure payment via Phonicore</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* CONTACT TAB */}
+                {tab === 'contact' && (
+                    <div className="max-w-4xl w-full animate-in fade-in slide-in-from-bottom-8 duration-500 text-center">
+                        <div className="bg-zinc-900/50 border border-zinc-800 p-10 rounded-3xl">
+                            <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Info size={32} className="text-white" />
+                            </div>
+                            <h2 className="text-3xl font-bold text-white mb-2">Get in Touch</h2>
+                            <p className="text-zinc-400 mb-8">Beatboy is a product of Phonicore. We are dedicated to building the best tools for producers.</p>
+                            
+                            <div className="flex flex-col md:flex-row gap-4 justify-center">
+                                <a href="https://phonicore.com" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-4 rounded-xl font-bold transition-all group">
+                                    <span>Visit Phonicore.com</span>
+                                    <Globe size={14} className="group-hover:translate-x-1 transition-transform" />
+                                </a>
+                                <a href="mailto:cookupking18@gmail.com" className="flex items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white px-6 py-4 rounded-xl font-bold transition-all">
+                                    <Mail size={14} /> Contact Support
+                                </a>
+                                <a href="https://www.youtube.com/@Phonicore" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white px-6 py-4 rounded-xl font-bold transition-all shadow-lg shadow-red-900/20">
+                                    <Youtube size={14} /> Phonicore TV
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+            </main>
+
+            {/* Footer */}
+            <footer className="relative z-10 py-6 text-center text-[10px] text-zinc-600 uppercase tracking-widest">
+                &copy; {new Date().getFullYear()} Phonicore. All rights reserved.
+            </footer>
         </div>
     );
 };
@@ -1668,7 +1802,7 @@ Contact support@beatboy.com
 
   return (
     <>
-    {!isActivated && <ActivationModal onSuccess={() => { setIsActivated(true); setActivationError(null); }} initialError={activationError} />}
+    {!isActivated && <LandingScreen onSuccess={() => { setIsActivated(true); setActivationError(null); }} initialError={activationError} />}
 
     {isActivated && (
     <div 
