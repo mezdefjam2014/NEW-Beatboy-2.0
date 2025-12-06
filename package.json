@@ -1,5 +1,5 @@
 {
-  "name": "copy-of-beatboy-final-2.0-final",
+  "name": "beatboy-final-4.1-final-landing-page",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,7 +12,9 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "lucide-react": "^0.555.0",
-    "jszip": "3.10.1"
+    "jszip": "3.10.1",
+    "html2canvas": "1.4.1",
+    "jspdf": "2.5.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
